@@ -41,6 +41,13 @@ class ParserTest {
         with(parser) {
             assertEquals(
                 "nikita",
+                launch("nikita<go", readSeq(allExcept('<', '<')))
+            )
+        }
+
+        with(parser) {
+            assertEquals(
+                "nikita",
                 launch("nikita", expectString("nikita"))
             )
         }

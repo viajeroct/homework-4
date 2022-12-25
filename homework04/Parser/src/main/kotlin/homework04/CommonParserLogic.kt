@@ -71,13 +71,17 @@ interface Combinators {
     fun <A> seqLaunch(vararg parsers: CommonParser<*, List<A>>): CommonParser<List<*>, List<A>> =
         marker@{ input: List<A> ->
             var total = 0
+            var copy = input
+            var last = 0
             val res = arrayListOf<Any>()
             for (p in parsers) {
-                val cur = p(input.drop(total))
+                copy = copy.drop(last)
+                val cur = p(copy)
                 if (cur is Failure) {
                     return@marker Failure(cur.errorInfo)
                 }
-                total += (cur as Success).consumed
+                last = (cur as Success).consumed
+                total += last
                 res.add(cur.data)
             }
             Success(res, total)
@@ -100,7 +104,8 @@ interface SimpleParsers {
     }
 
     fun allExcept(from: Char, to: Char): StringParser<Char> = { input: String ->
-        when (val c = input.first()) {
+        when (val c = input.firstOrNull()) {
+            null -> Failure(Location(input).toError("String is empty."))
             in from..to -> Failure(Location(input).toError("Expected all except $from..$to."))
             else -> Success(c, 1)
         }
@@ -140,9 +145,14 @@ interface SimpleParsers {
         else Failure(Location(input).toError("Size must be at least $n."))
     }
 
-    fun readBytesEraseType(n: Int): ByteParser<List<*>> = { input: List<UByte> ->
-        if (input.size >= n) Success(input.subList(0, n), n)
+    fun readBytesAndConvert(n: Int): ByteParser<Long> = { input: List<UByte> ->
+        if (input.size >= n) Success(convertToLong(input.subList(0, n)), n)
         else Failure(Location(input).toError("Size must be at least $n."))
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun readBytesEraseType(n: Int): ByteParser<List<*>> = { input: List<UByte> ->
+        readBytes(n)(input) as Result<List<*>>
     }
 
     fun expectEnd(): ByteParser<List<UByte>> = { input: List<UByte> ->

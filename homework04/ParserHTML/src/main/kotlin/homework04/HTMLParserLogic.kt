@@ -1,5 +1,7 @@
 package homework04
 
+import java.io.File
+
 fun merge(a: Success<String>, b: Result<String>): Result<String> {
     return when (b) {
         is Failure -> b
@@ -28,23 +30,7 @@ class HTMLParser : Parsers, SimpleParsers, Combinators {
                 Success(cur, cur.length)
             }
 
-            ' ',
-            in '0'..'9',
-            in 'A'..'Z',
-            in 'a'..'z' -> {
-                var cur = ""
-                if (endTags.lastOrNull()?.tag != "</p>") {
-                    cur = "<p>"
-                    endTags.add(Tag("</p>"))
-                }
-                val s = (readSeq(
-                    or(listOf(charRange('a', 'z'), charRange('A', 'Z'), charRange('0', '9'), char(' ')))
-                )(input) as Success).data
-                val res = cur + s
-                merge(Success(res, res.length), parseInner(tags, endTags)(input.drop(s.length)))
-            }
-
-            else -> when (val parsed = parseTag(tags)(input)) {
+            '<' -> when (val parsed = parseTag(tags)(input)) {
                 is Failure -> {
                     val last = endTags.removeLastOrNull()
                     if (last == null) Failure(Location(input).toError("Unexpected tag ${parsed.errorInfo}"))
@@ -61,7 +47,9 @@ class HTMLParser : Parsers, SimpleParsers, Combinators {
                 else -> {
                     var cur = ""
                     val foundTag = (parsed as Success).data
-                    if ((foundTag == "<p>" || foundTag == "<div>") && endTags.lastOrNull()?.tag == "</p>") {
+                    if ((foundTag == "<p>" || foundTag == "<div>") &&
+                        endTags.lastOrNull() == Tag("</p>")
+                    ) {
                         cur = "</p>"
                         endTags.last().isAlive = false
                     }
@@ -72,6 +60,17 @@ class HTMLParser : Parsers, SimpleParsers, Combinators {
                         parseInner(tags, endTags)(input.drop(foundTag.length))
                     )
                 }
+            }
+
+            else -> {
+                val s = (readSeq(or(listOf(allExcept('<', '<'))))(input) as Success).data
+                var cur = ""
+                if (endTags.lastOrNull() != Tag("</p>") && s.trim().isNotEmpty()) {
+                    cur = "<p>"
+                    endTags.add(Tag("</p>"))
+                }
+                val res = cur + s
+                merge(Success(res, res.length), parseInner(tags, endTags)(input.drop(s.length)))
             }
         }
     }
@@ -95,12 +94,18 @@ class HTMLParser : Parsers, SimpleParsers, Combinators {
     override fun <T : Any, A> run(p: CommonParser<T, A>, input: A): Result<T> = p(input)
 }
 
-fun main() {
-    val parsers = HTMLParser()
-    println(
-        parsers.run(
-            parsers.parseHTML(),
-            "abcd<div><p>efgh0</div>"
-        )
-    )
+fun main(args: Array<String>) {
+    val inputFile = args[0]
+    val outputFile = args[1]
+
+    val parser = HTMLParser()
+    val data = File(inputFile).readText()
+    val toWrite = when (val parsedData = parser.run(parser.parseHTML(), data)) {
+        is Success -> parsedData.data
+        is Failure -> parsedData.errorInfo.toString()
+    }
+
+    File(outputFile).bufferedWriter().use { out ->
+        out.write(toWrite)
+    }
 }

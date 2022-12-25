@@ -57,8 +57,8 @@ class ClassParser : Parsers, SimpleParsers, Combinators {
     fun parseClass() = { input: List<UByte> ->
         seqLaunch(
             expectBytes(listOf(202U, 254U, 186U, 190U)), /* magic */
-            readBytes(2), /* minor */
-            readBytes(2), /* major */
+            readBytesAndConvert(2), /* minor */
+            readBytesAndConvert(2), /* major */
             parseArray(
                 readBytes(2), /* pool count */
                 flatMap(
@@ -79,9 +79,9 @@ class ClassParser : Parsers, SimpleParsers, Combinators {
                 ),
                 1
             ),
-            readBytes(2), /* access */
-            readBytes(2), /* this */
-            readBytes(2), /* super */
+            readBytesAndConvert(2), /* access */
+            readBytesAndConvert(2), /* this */
+            readBytesAndConvert(2), /* super */
             parseArray(
                 readBytes(2), /* interfaces */
                 readBytes(2)
@@ -89,13 +89,13 @@ class ClassParser : Parsers, SimpleParsers, Combinators {
             parseArray(
                 readBytes(2), /* fields */
                 seqLaunch(
-                    readBytes(2), /* access */
-                    readBytes(2), /* name */
-                    readBytes(2), /* descriptor */
+                    readBytesAndConvert(2), /* access */
+                    readBytesAndConvert(2), /* name */
+                    readBytesAndConvert(2), /* descriptor */
                     parseArray(
                         readBytes(2), /* attributes */
                         seqLaunch(
-                            readBytes(2), /* attribute_name_index */
+                            readBytesAndConvert(2), /* attribute_name_index */
                             parseArray(readBytes(4), readBytes(1))
                         )
                     )
@@ -104,13 +104,13 @@ class ClassParser : Parsers, SimpleParsers, Combinators {
             parseArray(
                 readBytes(2), /* methods_count */
                 seqLaunch(
-                    readBytes(2), /* access */
-                    readBytes(2), /* name */
-                    readBytes(2), /* descriptor */
+                    readBytesAndConvert(2), /* access */
+                    readBytesAndConvert(2), /* name */
+                    readBytesAndConvert(2), /* descriptor */
                     parseArray(
                         readBytes(2), /* attributes */
                         seqLaunch(
-                            readBytes(2), /* attribute_name_index */
+                            readBytesAndConvert(2), /* attribute_name_index */
                             parseArray(readBytes(4), readBytes(1))
                         )
                     )
@@ -119,7 +119,7 @@ class ClassParser : Parsers, SimpleParsers, Combinators {
             parseArray(
                 readBytes(2), /* attributes_count */
                 seqLaunch(
-                    readBytes(2),
+                    readBytesAndConvert(2),
                     parseArray(readBytes(4), readBytes(1))
                 )
             ),
@@ -132,53 +132,53 @@ class ClassParser : Parsers, SimpleParsers, Combinators {
 
 fun convertToClassFile(data: List<*>): ClassFile = ClassFile(
     data[0].uba().toNumber(),
-    data[1].uba().toNumber(),
-    data[2].uba().toNumber(),
-    data[3].lt()[0].la()[0],
-    data[3].lt()[1].lt().map { CpInfo(it.lt()[0].uba()[0], it.lt()[1].lt()) },
-    data[4].uba().toNumber(),
-    data[5].uba().toNumber(),
-    data[6].uba().toNumber(),
-    data[7].lt()[0].la()[0],
-    data[7].lt()[1].lt(),
-    data[8].lt()[0].la()[0],
-    data[8].lt()[1].lt().map { field ->
+    data[1] as Long,
+    data[2] as Long,
+    data[3].len(),
+    data[3].asArray().map { CpInfo(it[0].uba()[0], it.asArray()) },
+    data[4] as Long,
+    data[5] as Long,
+    data[6] as Long,
+    data[7].len(),
+    data[7].asArray(),
+    data[8].len(),
+    data[8].asArray().map { field ->
         FieldInfo(
-            field.lt()[0].uba().toNumber(),
-            field.lt()[1].uba().toNumber(),
-            field.lt()[2].uba().toNumber(),
-            field.lt()[3].lt()[0].la()[0],
-            field.lt()[3].lt()[1].lt().map {
+            field[0] as Long,
+            field[1] as Long,
+            field[2] as Long,
+            field[3].len(),
+            field[3].asArray().map {
                 AttributeInfo(
-                    it.lt()[0].uba().toNumber(),
-                    it.lt()[1].lt()[0].la()[0],
-                    it.lt()[1].lt()[1].uba()
+                    it[0] as Long,
+                    it[1].len(),
+                    it[1].asUByteArray()
                 )
             }
         )
     },
-    data[9].lt()[0].la()[0],
-    data[9].lt()[1].lt().map { method ->
+    data[9].len(),
+    data[9].asArray().map { method ->
         MethodInfo(
-            method.lt()[0].uba().toNumber(),
-            method.lt()[1].uba().toNumber(),
-            method.lt()[2].uba().toNumber(),
-            method.lt()[3].lt()[0].la()[0],
-            method.lt()[3].lt()[1].lt().map {
+            method[0] as Long,
+            method[1] as Long,
+            method[2] as Long,
+            method[3].len(),
+            method[3].asArray().map {
                 AttributeInfo(
-                    it.lt()[0].uba().toNumber(),
-                    it.lt()[1].lt()[0].la()[0],
-                    it.lt()[1].lt()[1].uba()
+                    it[0] as Long,
+                    it[1].len(),
+                    it[1].asUByteArray()
                 )
             }
         )
     },
-    data[10].lt()[0].la()[0],
-    data[10].lt()[1].lt().map {
+    data[10].len(),
+    data[10].asArray().map {
         AttributeInfo(
-            it.lt()[0].uba().toNumber(),
-            it.lt()[1].lt()[0].la()[0],
-            it.lt()[1].lt()[1].uba()
+            it[0] as Long,
+            it[1].len(),
+            it[1].asUByteArray()
         )
     }
 )
@@ -200,7 +200,8 @@ fun convertToReadableFormat(res: ClassFile): String {
     }
 
     answer.append("Version: ${res.major_version}.${res.minor_version}").append("\n")
-    answer.append("Class: ${getAccessFlags(res.access_flags, 0)} ${getCpInfoObject(res.this_class)}").append("\n")
+    answer.append("Class: ${getAccessFlags(res.access_flags, AccessType.CLASS)} ${getCpInfoObject(res.this_class)}")
+        .append("\n")
     answer.append("Super class: ${getCpInfoObject(res.super_class)}").append("\n")
 
     val interfacesNames = res.interfaces.map {
@@ -211,37 +212,58 @@ fun convertToReadableFormat(res: ClassFile): String {
     val parsers = ClassParser()
 
     answer.append("Fields:").append("\n")
-    res.fields.forEach {
-        val signature = parsers.parseArgument()(getCpInfoObjectDirect(it.descriptor_index)) as Success
+    res.fields.forEach { field ->
+        val signature = parsers.parseArgument()(getCpInfoObjectDirect(field.descriptor_index))
+        if (signature is Failure) {
+            return signature.errorInfo.toString()
+        }
+        signature as Success
         answer.append(
             "${
                 getAccessFlags(
-                    it.access_flags, 1
+                    field.access_flags, AccessType.FIELD
                 )
-            } ${signature.data} ${getCpInfoObjectDirect(it.name_index)}"
+            } ${signature.data} ${getCpInfoObjectDirect(field.name_index)}"
         ).append("\n")
+        answer.append("\tAttributes: ")
+        answer.append(field.attributes.joinToString(separator = ", ") { getCpInfoObjectDirect(it.attribute_name_index) })
+            .append("\n")
     }
 
     answer.append("Methods:").append("\n")
     res.methods.forEach { method ->
-        val signature = (parsers.parseMethodSignature()(getCpInfoObjectDirect(method.descriptor_index)) as Success).data
+        val signatureR = parsers.parseMethodSignature()(getCpInfoObjectDirect(method.descriptor_index))
+        if (signatureR is Failure) {
+            return signatureR.errorInfo.toString()
+        }
+        val signature = (signatureR as Success).data
         val params = signature.withIndex().map { (i, it) -> "$it param$i" }
         val fields = params.dropLast(1).joinToString(separator = ", ") { it }
         answer.append(
             "${
                 getAccessFlags(
                     method.access_flags,
-                    2
+                    AccessType.METHOD
                 )
             } ${signature.last()} ${getCpInfoObjectDirect(method.name_index)}($fields)"
         ).append("\n")
+        answer.append("\tAttributes: ")
+        answer.append(method.attributes.joinToString(separator = ", ") { getCpInfoObjectDirect(it.attribute_name_index) })
+            .append("\n")
     }
+
+    answer.append("Attributes: ")
+    answer.append(res.attributes.joinToString(separator = ", ") { getCpInfoObjectDirect(it.attribute_name_index) })
+        .append("\n")
+
     return answer.toString()
 }
 
 fun main() {
     val pathToClassFile =
-        "/home/nikita/kotlin-course/kotlin-hse-2022/homework04/ParserClass/src/main/kotlin/corrupted/D.class"
+        "/home/nikita/kotlin-course/kotlin-hse-2022/homework04/ParserClass/src/main/kotlin/var/Nikita.class"
+//    val pathToClassFile =
+//        "/home/nikita/kotlin-course/kotlin-hse-2022/homework04/ParserClass/src/main/kotlin/corrupted/C.class"
 
     val parsers = ClassParser()
     val bytes = readClassFile(pathToClassFile)
@@ -252,5 +274,5 @@ fun main() {
     }
     val classFile = convertToClassFile((parsedData as Success).data)
     val s = convertToReadableFormat(classFile)
-    println(s)
+    print(s)
 }

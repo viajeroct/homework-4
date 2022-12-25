@@ -51,6 +51,10 @@ data class CpInfo(
     }
 }
 
+enum class AccessType {
+    CLASS, FIELD, METHOD
+}
+
 object AccessFlags {
     private val class_accesses = listOf(0x0001, 0x0010, 0x0020, 0x0200, 0x0400, 0x1000, 0x2000, 0x4000, 0x8000).zip(
         listOf("public", "final", "super", "interface", "abstract", "synthetic", "annotation", "enum", "module")
@@ -67,5 +71,9 @@ object AccessFlags {
             "bridge", "varargs", "native", "abstract", "strict", "synthetic"
         )
     )
-    val accesses = listOf(class_accesses, field_accesses, method_accesses)
+    val accesses = mapOf(
+        AccessType.CLASS to class_accesses,
+        AccessType.FIELD to field_accesses,
+        AccessType.METHOD to method_accesses
+    )
 }

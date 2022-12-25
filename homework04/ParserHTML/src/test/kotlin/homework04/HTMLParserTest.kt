@@ -16,6 +16,14 @@ class HTMLParserTest {
     @Test
     fun testHTML() {
         assertEquals(
+            "<body><p></p><p></p><p></p><p>go</p><div></div></body>",
+            launch("<p><p><p><p>go<div></div>")
+        )
+        assertEquals(
+            "<body><div><p>nikita</p><div><p>go</p></div><div><p>hello</p></div></div></body>",
+            launch("<div>nikita<div>go</div><div>hello</div>")
+        )
+        assertEquals(
             "<body><p>nikita</p></body>",
             launch("nikita")
         )
@@ -57,7 +65,7 @@ class HTMLParserTest {
             launch("")
         )
         assertEquals(
-            "<body><p>  </p></body>",
+            "<body>  </body>",
             launch("    <body>  </body>   ")
         )
         assertEquals(
