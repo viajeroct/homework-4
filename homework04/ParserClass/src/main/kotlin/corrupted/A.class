@@ -1,0 +1,18 @@
+\CA\FE\BE\00\00\00=\00d
+\00\00\00\00\00\00)java/util/concurrent/atomic/AtomicInteger\00<init>\00()V	\00\00	\00
+\00\00\00homework04/Nikita\00field1\00I	\00\00\00\00\00field2\00\00[[[I	\00\00\00\00\00field4	\00\00\00\00\00\00java/math/BigInteger\00ONE\00Ljava/math/BigInteger;	\00\00\00\00\00field3	\00\00 \00!\00"\00#\00java/lang/System\00out\00Ljava/io/PrintStream;
+\00%\00&\00'\00(\00)\00java/io/PrintStream\00println\00(I)V
+\00%\00+\00(\00,\00(D)V
+\00.\00/\000\001\002\00java/lang/Integer\00toString\00(I)Ljava/lang/String;
+\004\005\006\001\007\00java/lang/Double\00(D)Ljava/lang/String;\00\00\009\00:\00;\00makeConcatWithConstants\008(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+\00\00=\00>\00?\00valueOf\00(J)Ljava/math/BigInteger;
+\00\00A\00B\00C\00	compareTo\00(Lhomework04/Nikita;)I\00E\00java/lang/Comparable\00G\00java/lang/Runnable\00
+ConstantValue\00\00\00\00\00Code\00LineNumberTable\00method1\000(ID[[[ILjava/math/BigInteger;)Ljava/lang/String;\00method2\00run\00(Ljava/lang/Object;)I\00	Signature\00jLjava/util/concurrent/atomic/AtomicInteger;Ljava/lang/Comparable<Lhomework04/Nikita;>;Ljava/lang/Runnable;\00
+SourceFile\00Nikita.java\00BootstrapMethods\00W
+\00X\00Y\00Z\00:\00[\00$java/lang/invoke/StringConcatFactory\00\98(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;\00]\00\00InnerClasses\00`\00%java/lang/invoke/MethodHandles$Lookup\00b\00java/lang/invoke/MethodHandles\00Lookup\00!\00\00\00\00D\00F\00\00\00\00\00\00H\00\00\00\00I\00\00\00\00\00H\00\00\00\00I\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00J\00\00\00I\00\00\00\00\00!*\B7\00*\B5\00*\B5\00
+*\C5\00\B5\00*\B2\00\B5\00\B1\00\00\00\00K\00\00\00\00\00\00\00\00\00\00	\00\00\00	\00\00
+\00	\00L\00M\00\00J\00\00\00<\00\00\00\00\00\B2\00\B6\00$\B2\00'\B6\00*\B8\00-'\B8\003\BA\008\00\00\B0\00\00\00\00K\00\00\00\00\00\00\00
+\00\00\00\00\00\00N\00)\00\00J\00\00\00&\00\00\00\00\00
+*\85\B8\00<\B5\00\B1\00\00\00\00K\00\00\00
+\00\00\00\00\00	\00\00\00B\00C\00\00J\00\00\00\00\00\00\00\00\AC\00\00\00\00K\00\00\00\00\00\00\00\00\00O\00\00\00J\00\00\00\00\00\00\00\00\00\B1\00\00\00\00K\00\00\00\00\00\00\00A\00B\00P\00\00J\00\00\00!\00\00\00\00\00	*+\C0\00\B6\00@\AC\00\00\00\00K\00\00\00\00\00\00\00\00\00Q\00\00\00\00R\00S\00\00\00\00T\00U\00\00\00\00\00V\00\00\\00^\00\00\00
+\00\00_\00a\00\00\00\00
